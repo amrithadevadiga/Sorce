@@ -1,0 +1,112 @@
+#!/usr/bin/env bdwb
+################################################################################
+#                                                                              #
+#  Sample workbench instructions for building a BlueData catalog entry.        #
+#                                                                              #
+################################################################################
+#
+# YOUR_ORGANIZATION_NAME must be replaced with a valid organization name. Please
+# refer to 'help builder organization' for details.
+#
+builder organization --name Bluedata
+
+## Begin a new catalog entry
+catalog new --distroid hdf21base --name "HDF2.1(NIFI)"                 \
+            --desc "HDF2.1"                              \
+            --categories ETLTools		\ 
+	    --version 4.0 
+
+## Define all node roles for the virtual cluster.
+role add controller 1
+role add worker 0+
+
+
+# Define all services that are available
+service add --srvcid HDF-master --name "NIFI-MASTER" --scheme "http" \
+            --port 8080 --path "/nifi" --display
+service add --srvcid HDF-slave --name "NIFI-WORKER" --scheme "http" \
+            --port 8080 --path "/nifi" --display
+service add --srvcid Zookeeper-service --name "Zookeeper service" --port 2181 
+
+## Define run time placement of the services
+clusterconfig new --configid default
+clusterconfig assign --configid default --role controller --srvcids HDF-master HDF-slave Zookeeper-service
+clusterconfig assign --configid default --role worker --srvcids HDF-slave Zookeeper-service
+
+## Appconfiguration autogenenration.
+appconfig autogen --new --configapi 4
+
+appconfig autogen --pkgfile nifi.properties \
+		  --destdir /opt/hdf/nifi-1.1.0.2.1.2.0-10/conf
+appconfig autogen --pkgfile zookeeper.properties \
+		  --destdir /opt/hdf/nifi-1.1.0.2.1.2.0-10/conf
+appconfig autogen --pkgfile state-management.xml \
+                  --destdir /opt/hdf/nifi-1.1.0.2.1.2.0-10/conf
+appconfig autogen --abspath /etc/init.d/Zookeeper-service --perms 777 --uid bluedata --gid bluedata
+appconfig autogen --abspath /etc/init.d/start_zookeeper.sh --perms 777 --uid bluedata --gid bluedata
+appconfig autogen --abspath /etc/init.d/HDF-master --perms 777 --uid bluedata --gid bluedata
+appconfig autogen --abspath /etc/init.d/start_Nifi.sh --perms 777 --uid bluedata --gid bluedata
+appconfig autogen --abspath /etc/init.d/HDF-slave --perms 777 --uid bluedata --gid bluedata
+appconfig autogen --abspath /etc/init.d/start_slave_nifi.sh --perms 777 --uid bluedata --gid bluedata
+## replace pattern
+appconfig autogen --replace /opt/hdf/nifi-1.1.0.2.1.2.0-10/conf/nifi.properties \
+		  --pattern @@@NIFI_HOST@@@ --macro GET_NODE_FQDN
+
+appconfig autogen --pkgfile HDF-master     \
+                  --destdir /etc/init.d/
+
+appconfig autogen --pkgfile start_Nifi.sh     \
+                  --destdir /etc/init.d/
+
+appconfig autogen --pkgfile HDF-slave    \
+		  --destdir /etc/init.d/
+
+appconfig autogen --pkgfile start_slave_nifi.sh  \
+                  --destdir /etc/init.d/
+
+appconfig autogen --pkgfile Zookeeper-service \
+		  --destdir /etc/init.d/
+
+appconfig autogen --pkgfile start_zookeeper.sh     \
+                  --destdir /etc/init.d/
+
+appconfig autogen --pkgfile configure_zookeeper.sh  \
+		  --destdir /etc/init.d/ 
+
+appconfig autogen --srvcid HDF-master --sysv HDF-master
+appconfig autogen --srvcid HDF-slave --sysv HDF-slave
+appconfig autogen --srvcid Zookeeper-service --sysv Zookeeper-service
+
+appconfig autogen --execute start_Nifi.sh
+appconfig autogen --execute start_slave_nifi.sh
+appconfig autogen --execute start_zookeeper.sh
+appconfig autogen --execute configure_zookeeper.sh
+
+appconfig autogen --generate
+appconfig package
+
+## Specify a logo file for the
+logo file --filepath Logo_HDF.png
+
+################################################################################
+#                        Catalog package for CentOS                            #
+################################################################################
+image build --basedir image/centos --imgversion 4.0 --os centos
+catalog save --filepath staging/HDF21-centos.json --force
+sources package
+catalog package --os=centos
+
+################################################################################
+#                        Catalog package for RHEL                              #
+#                                                                              #
+# Set RHEL_USERNAME and RHEL_PASSWORD environment variables before invoking    #
+# the workbench. The Dockerfile uses subscription-manager to subscribe before  #
+# installing any packages. The subscription is cleaned up at the end of the    #
+# build process in the same Dockerfile.                                        #
+################################################################################
+#image build --basedir image/rhel --imgversion 1.0 --os rhel
+#catalog save --filepath staging/datameer-rhel.json --force
+#sources package
+#catalog package --os=rhel
+
+workbench clean

@@ -1,0 +1,14 @@
+#!/bin/env bash
+
+tar xf ${CONFIG_BASE_DIR}/Python-2.6.tgz -C /tmp
+cd /tmp/Python-2.6
+./configure --prefix=/usr/local --enable-optimizations
+make altinstall
+
+tar xf ${CONFIG_BASE_DIR}/Python-3.7.0.tgz -C /tmp
+cd /tmp/Python-3.7.0
+./configure --prefix=/usr/local --enable-optimizations
+make altinstall
+
+export PATH="/usr/local/bin:$PATH"
+rm /tmp/Python* -rf

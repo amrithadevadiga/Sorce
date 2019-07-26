@@ -1,0 +1,10 @@
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'Secur1ty!'; 
+uninstall plugin validate_password;
+CREATE DATABASE registry DEFAULT CHARACTER SET utf8;
+CREATE DATABASE streamline DEFAULT CHARACTER SET utf8; 
+CREATE USER 'registry'@'%' IDENTIFIED BY '@@@PASSWORD@@@'; 
+CREATE USER 'streamline'@'%' IDENTIFIED BY '@@@PASSWORD@@@'; 
+GRANT ALL PRIVILEGES ON *.* TO 'registry'@'%' WITH GRANT OPTION ; 
+GRANT ALL PRIVILEGES ON *.* TO 'streamline'@'%' WITH GRANT OPTION ; 
+FLUSH PRIVILEGES;
+commit; 

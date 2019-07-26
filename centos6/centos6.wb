@@ -1,0 +1,28 @@
+#!/usr/bin/env bdwb
+#
+# YOUR_ORGANIZATION_NAME must be replaced with a valid organization name. Please
+# refer to 'help builder organization' for details.
+ builder organization --name sds
+
+## Begin a new catalog entry
+catalog new --distroid centos6 --name "CentOS 6.x"                             \
+            --desc "CentOS 6.x without any pre-installed application frameworks."\
+            --categories Utility --version 3.1
+
+## Define all node roles for the virtual cluster.
+role add utility 1+
+
+appconfig autogen --new
+appconfig autogen --generate
+appconfig package
+
+logo file --filepath Logo_CentOS.png
+
+image pull --image-repotag docker.io/bluedata/centos6:2.2
+image package --os centos6 --roles utility --image-repotag docker.io/bluedata/centos6:2.2
+
+catalog save --force
+sources package
+catalog package
+
+workbench clean

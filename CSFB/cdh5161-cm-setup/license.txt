@@ -1,0 +1,27 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+{
+  "features" : [ ],
+  "name" : "BlueData_trial_ns",
+  "uuid" : "f1c3a6fa-9f6b-4c0e-83a7-16162847578a",
+  "version" : 1,
+  "expirationDate" : "2019-02-23"
+}
+-----BEGIN PGP SIGNATURE-----
+Version: BCPG v1.46
+
+iQIcBAEBCAAGBQJcSQglAAoJECXwRXLmH8tlBqEP/3k3NgTNvcilXrluBoSZaM1H
+sU9mzszYYIfBFdZhFU7KAbRnRR0v4DWPobtCeyF6/z9NSEl7V+6LNalxIHiEJvJg
+d4wP665215v/iMwy8ZpVqCdznpBha6QPIglJL+VGoQj8sgqNoxemIJfU4Ze51N3V
+ha1m7Wxf+wPNKZ1iSl9UczT/kOQXHGE1IuawnkDBt0VISLw8zIIDGuq/sK47WfAU
+tgYgrDVGtSs/JF58sBTcFmObNPuR+fCsS4IyawaNZE1jCTltJZZoOCI41azpWNHg
+HpRe0AD+yH0l2XLGYxKM+BoGJWOl8tcdb0V9wQHbvPZFtkanTpqo4FthftIyrXRl
+K3P757aCPygmaoWujx3dnKdptFZR+IMZe24qhcfZzDwllAf1awW06tAmrXvBbW9F
+SPzqAxcOiHbYGwjcjkQKfhhcTil4yBNLvHN1/VIPil8E7G5mEeG13FLi7oToCukn
++ZhUqdfZpDjkIZcS+3se6Kw896/4YFw1trE3dUdtoCuPT8VZQzysd7QtyX2zeERJ
+p9J28KARFx/5bHz2KSaQoAwhLxO7QUcWt18D1tYZbPrrzd+d3uFqvJ88A4LjPDqA
+wKeqq4oXvXnMBaSYPt0aLkHm3iTgXopY6VzObO5cfPYWbSlZAFOnfaVd5qcHHv7j
+NSk9l/WmJfzpHAG8yTGQ
+=gHDb
+-----END PGP SIGNATURE-----

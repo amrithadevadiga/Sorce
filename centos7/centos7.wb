@@ -1,0 +1,34 @@
+#!/usr/bin/env bdwb
+#
+# YOUR_ORGANIZATION_NAME must be replaced with a valid organization name. Please
+# refer to 'help builder organization' for details.
+ builder organization --name sds
+
+catalog new --distroid centos7 --name "CentOS 7.x"                             \
+            --desc "CentOS 7.x with no pre-packaged apps or software."         \
+            --categories Utility --version 2.2
+
+## Define all node roles for the virtual cluster.
+role add controller 1+
+role add worker 0+
+
+# Instructions for autogenerating a simple appconfig bundle.
+appconfig autogen --new
+appconfig autogen --generate
+appconfig package
+
+##logo
+logo file --filepath Logo_CentOS.png
+
+################################################################################
+#                        Catalog package for CentOS                            #
+################################################################################
+image pull --image-repotag docker.io/bluedata/centos7:4.1
+image package --os centos7 --image-repotag docker.io/bluedata/centos7:4.1
+
+## Save the catalog entry to a file.
+catalog save
+sources package
+catalog package
+
+workbench clean

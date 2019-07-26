@@ -1,0 +1,10 @@
+#!/bin/env bash
+
+tar xf /opt/Python-3.6.0.tgz -C /opt
+cd /opt/Python-3.6.0
+./configure --prefix=/usr/local 
+make
+make altinstall
+export PATH="/usr/local/bin:$PATH"
+python3.6 /opt/get-pip.py
+rm /opt/Python-3.6.0* -rf

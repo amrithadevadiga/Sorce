@@ -1,0 +1,148 @@
+#!/bin/env bash
+#
+# Copyright (c) 2017, BlueData Software, Inc.
+
+SELF=$(readlink -nf $0)
+export CONFIG_BASE_DIR=$(dirname ${SELF})
+export TEMPLATES_DIR=${CONFIG_BASE_DIR}/templates
+source ${CONFIG_BASE_DIR}/logging.sh
+source ${CONFIG_BASE_DIR}/utils.sh
+
+invoke_bdvcli --startconfiguration
+export ROLE="$(invoke_bdvcli --get node.role_id)"
+export FQDN="$(invoke_bdvcli --get node.fqdn)"
+export DISTRO="$(invoke_bdvcli --get node.distro_id)"
+export NODEGROUP="$(invoke_bdvcli --get node.nodegroup_id)"
+export CONTROLLER_FQDN="$(invoke_bdvcli --get distros.${DISTRO}.${NODEGROUP}.roles.controller.fqdns)"
+export AMBARI_USER="$(invoke_bdvcli --get cluster.config_metadata.${NODEGROUP}.ambari_user)"
+export AMBARI_PASSWORD="$(invoke_bdvcli --get cluster.config_metadata.${NODEGROUP}.ambari_password)"
+export AMBARI_PORT="$(invoke_bdvcli --get cluster.config_metadata.${NODEGROUP}.ambari_port)"
+export hdf_ambari_mpack_url="$(invoke_bdvcli --get cluster.config_metadata.${NODEGROUP}.hdf_ambari_mpack_url)"
+export PASSWORD="BLUEDATA_Admin@1234"
+
+
+if [[ "$1" == "--advconfig" ]]; then
+    log "No advanced configurations for Centos66 "
+    exit 0
+elif [[ "$1" == "--addnodes" ]]; then
+    if [[ "$ROLE" == 'controller' ]]; then
+        invoke_bdvcli --tokenwake 'REPOSETUP'
+        log "Expanding Cluster"
+        log_exec python ${CONFIG_BASE_DIR}/modify_hosts.py $@
+    fi
+    exit 0
+elif [[ "$1" == "--delnodes" ]]; then
+    if [[ "$ROLE" == 'controller' ]]; then
+        invoke_bdvcli --tokenwake 'REPOSETUP'
+        log "Shrinking Cluster"
+        log_exec python ${CONFIG_BASE_DIR}/modify_hosts.py $@
+
+    fi
+    exit 0
+elif [[ "$1" == "--configure" ]]; then
+    log "Starting configuration ... "
+
+    ## Fall through to start the configuration.
+else
+    log_error "Unknown command line option(s): '$@'"
+    exit 10
+fi
+
+export CLUSTER_NAME="$(invoke_bdvcli --get cluster.name)"
+
+log "Cluster Name is $CLUSTER_NAME"
+
+
+################################################################################
+# Ambari specific configuration begins.
+################################################################################
+
+
+
+############################### MAIN PROGRAM #######################
+
+setup_mysql(){	
+      oldpass=$( grep 'temporary.*root@localhost' /var/log/mysqld.log | tail -n 1 | sed 's/.*root@localhost: //' )
+       sed -i 's/@@@PASSWORD@@@/'${PASSWORD}'/g'  ${CONFIG_BASE_DIR}/mysql-setup.sql
+       #execute sql file
+       mysql -h localhost -u root -p"$oldpass" --connect-expired-password < ${CONFIG_BASE_DIR}/mysql-setup.sql
+}
+
+
+setup_ambari_agent(){
+
+  log "Start Ambari Agent"
+  log_sudo_exec cp -f ${CONFIG_BASE_DIR}/templates/ambari-agent.ini.template /etc/ambari-agent/conf/ambari-agent.ini
+  log_exec sed -i \"s/^hostname=.*/hostname=${CONTROLLER_FQDN}/g\" /etc/ambari-agent/conf/ambari-agent.ini
+  log_exec sudo service ambari-agent restart
+  invoke_bdvcli --service_key=services.ambari_agent.${NODEGROUP}.${ROLE} --systemv=ambari-agent
+
+}
+
+
+setup_ambari_server(){
+
+  log "Setup Ambari Server"
+  log_exec ambari-server setup -s -j /usr/java/default
+  invoke_bdvcli --nodegroup_primary
+
+  log "Registering Ambari server with vagent"
+  #We are doing this for setting a larger timeout of 300 seconds
+  log_sudo_exec cp -f ${CONFIG_BASE_DIR}/templates/ambari.properties.template /etc/ambari-server/conf/ambari.properties
+  log_exec sudo service ambari-server start
+  invoke_bdvcli --service_key=services.ambari.${NODEGROUP}.controller --systemv=ambari-server
+  log_exec sudo systemctl enable mysqld.service
+  log_exec sudo systemctl start mysqld.service
+  log "wait for ambari to come up"
+  invoke_bdvcli --wait services.ambari.${NODEGROUP}.controller
+  sleep 10
+
+}
+
+log_sudo_exec systemctl start ntpd
+log_sudo_exec systemctl enable ntpd
+
+if [[ "$ROLE" == 'controller' ]]; then
+    log_sudo_exec yum install -y https://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm
+    log_sudo_exec yum install -y mysql-connector-java* mysql-community-server nc
+    setup_ambari_agent
+    setup_ambari_server
+
+    log "Wake Up! Repo is all set!"
+    invoke_bdvcli --tokenwake 'REPOSETUP'
+
+    log "generating cluster json for deployment"
+    log_exec python  ${CONFIG_BASE_DIR}/generate_cluster_json.py
+    
+    log "waiting for all agents to register"
+    invoke_bdvcli --wait services.ambari_agent.1 
+
+    
+    log "Setting Mysql"
+    setup_mysql
+    log_exec sudo systemctl restart mysqld.service
+    log_exec ambari-server setup --jdbc-db=mysql --jdbc-driver=/usr/share/java/mysql-connector-java.jar
+    log "Installing mpack"
+    log_exec ambari-server install-mpack --mpack=${hdf_ambari_mpack_url} --verbose 
+    
+    log_exec sudo service ambari-server restart
+   
+    sed -i 's/@@@PASSWORD@@@/'${PASSWORD}'/g'  ${CONFIG_BASE_DIR}/configuration_custom.json
+    sed -i 's/@@@HOSTNAME@@@/'$(hostname)'/g'  ${CONFIG_BASE_DIR}/configuration_custom.json
+    
+    log "generating recommended Configuration"
+    log_exec python ${CONFIG_BASE_DIR}/CheckingRegisteredHosts.py
+       
+    log "Generating Blueprint"
+    log_exec python  ${CONFIG_BASE_DIR}/create_blueprint.py --conf_recommendation ${CONFIG_BASE_DIR}/configurations.json --host_recommendation ${CONFIG_BASE_DIR}/host_groups.json --blueprint ${CONFIG_BASE_DIR}/blueprint.json --cluster_template ${CONFIG_BASE_DIR}/cluster.json  --blueprint_name "bd-hdf" --custom_configuration ${CONFIG_BASE_DIR}/configuration_custom.json
+    
+    log "Deploy Blueprint"
+    log_exec ${CONFIG_BASE_DIR}/deploy.py
+
+else
+    log "Setting up ambari agent"
+    invoke_bdvcli --tokenwait 'REPOSETUP' --fqdn ${CONTROLLER_FQDN}
+    setup_ambari_agent
+fi
+
+exit 0
