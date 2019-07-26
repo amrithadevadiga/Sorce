@@ -1,0 +1,89 @@
+#!/usr/bin/env bdwb
+################################################################################
+#                                                                              #
+#  Sample workbench instructions for building a BlueData catalog entry.        #
+#                                                                              #
+################################################################################
+#
+# YOUR_ORGANIZATION_NAME must be replaced with a valid organization name. Please
+# refer to 'help builder organization' for details.
+#
+builder organization --name BlueData
+
+## Begin a new catalog entry
+catalog new --distroid elkstack662v1 --name "ELK Stack 6.6.2 v1"                           \
+            --desc "ELK Stack 6.6.2 cluster with elastic, logstash and kibana nodes v1"			\
+            --categories ElasticSearch --catalogapi 3 --version 1.0
+
+## Define all node roles for the virtual cluster.
+role add master 1+
+role add data 0+
+role add kibana 0+
+role add logstash 0+
+
+## Define all services that are available in the virtual cluster.
+
+service add --srvcid elasticsearch --name "ElasticSearch" --scheme "http"       \
+            --port 9200 --path "/" --display \
+            --sysctl elasticsearch \
+            --onroles master data
+
+service add --srvcid kibana --name "Kibana" --scheme "http"       \
+            --port 5601 --path "/" --display \
+            --sysctl kibana \
+            --onroles kibana
+
+service add --srvcid logstash --name "Logstash" --scheme "http"       \
+            --port 9600 --sysctl logstash \
+            --onroles logstash
+
+## Appconfiguration autogenenration.
+appconfig autogen --new --configapi 7
+
+appconfig autogen --pkgfile elasticsearch.yml --destdir /etc/elasticsearch/
+
+appconfig autogen --pkgfile kibana.yml --destdir /etc/kibana/
+
+appconfig autogen --pkgfile logstash-filter.conf --destdir /etc/logstash/conf.d/
+
+#Replace
+
+appconfig autogen --execute discovery_list.sh --onroles master data logstash kibana
+
+appconfig autogen --replace /etc/elasticsearch/elasticsearch.yml \
+                  --pattern @@@@MY_IP@@@@ --macro GET_NODE_IPADDR \
+                  --pattern @@@@HOSTNAME@@@@ --macro "echo $HOSTNAME"
+
+appconfig autogen --replace /etc/kibana/kibana.yml \
+                  --pattern @@@@MY_IP@@@@ --macro GET_NODE_IPADDR \
+                  --pattern @@@@HOSTNAME@@@@ --macro "echo $HOSTNAME"
+
+# node is expected to run the service.
+
+appconfig autogen --generate
+appconfig package
+
+## Specify a logo file for the
+logo file --filepath Logo_ELKStack.png
+
+################################################################################
+#                        Catalog package for CentOS                            #
+################################################################################
+image build --basedir image/centos --image-repotag bluedata/elasticsearch662:1.0
+image package --image-repotag bluedata/elasticsearch662:1.0 --os centos7
+catalog save --filepath staging/elasticsearch662.json --force
+sources package
+catalog package
+
+################################################################################
+#                        Catalog package for RHEL                              #
+#                                                                              #
+# Set RHEL_USERNAME and RHEL_PASSWORD environment variables before invoking    #
+# the workbench. The Dockerfile uses subscription-manager to subscribe before  #
+# installing any packages. The subscription is cleaned up at the end of the    #
+# build process in the same Dockerfile.                                        #
+################################################################################
+#image build --basedir image/rhel --imgversion 1.0 --os rhel
+#catalog save --filepath staging/elasticsearch662.json --force
+#sources package
+#catalog package --os=rhel

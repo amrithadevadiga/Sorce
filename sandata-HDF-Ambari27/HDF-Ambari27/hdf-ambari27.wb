@@ -1,0 +1,16 @@
+#!/usr/bin/env bdwb
+#
+
+# YOUR_ORGANIZATION_NAME must be replaced with a valid organization name. Please
+# refer to 'help builder organization' for details.
+builder organization --name BlueData
+
+catalog load --filepath hdf-ambari27-centos.json
+appconfig package --dir ambari-27-setup
+logo file --filepath icon-dataflow.png
+## Centos catalog bundle
+image build --basedir image/centos --image-repotag bluedata/hdf-ambari27-7x:1.0
+image package --image-repotag bluedata/hdf-ambari27-7x:1.0 --os centos7
+catalog save --filepath staging/hdf-ambari27-centos.json --force
+sources package --additional ambari-27-setup
+catalog package

@@ -1,0 +1,11 @@
+cluster.name: sds-demo-cluster
+node.name: @@@@HOSTNAME@@@@
+network.host: @@@@MY_IP@@@@
+discovery.zen.ping.unicast.hosts: [@@@@ESNODE_LIST@@@@]
+# minimum_master_nodes need to be explicitly set when bound on a public IP
+# set to 1 to allow single node clusters
+# Details: https://github.com/elastic/elasticsearch/pull/17288
+discovery.zen.minimum_master_nodes: 1
+path:
+  data: /var/lib/elasticsearch
+  logs: /var/log/elasticsearch

@@ -1,0 +1,245 @@
+{
+    "catalog_api_version": 3,
+    "config": {
+        "config_meta": {
+            "ambari_password": "admin",
+            "hdf_ambari_mpack_url": "http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.0.0-165.tar.gz",
+            "ambari_user": "admin",
+            "ambari_port": "8080"
+        },
+        "config_choices": [
+            {
+                "id": "storm",
+                "type": "boolean",
+                "label": { "name": "Storm" },
+                "selections": [
+                    {
+                        "id": false
+                    },
+                    {
+                        "id": true,
+                        "config": {
+                            "selected_roles": [ "controller" ],
+                            "node_services": []
+                        }
+                    }
+                ]
+            },
+             {
+                "id": "SAM",
+                "type": "boolean",
+                "label": { "name": "Storm" },
+                "selections": [
+                    {
+                        "id": false
+                    },
+                    {
+                        "id": true,
+                        "config": {
+                            "selected_roles": [ "controller" ],
+                            "node_services": []
+                        }
+                    }
+                ]
+            },
+             {
+                "id": "kakfa",
+                "type": "boolean",
+                "label": { "name": "Storm" },
+                "selections": [
+                    {
+                        "id": false
+                    },
+                    {
+                        "id": true,
+                        "config": {
+                            "selected_roles": [ "controller" ],
+                            "node_services": []
+                        }
+                    }
+                ]
+            }],
+        "node_services": [
+            {
+                "service_ids": [
+                    "ambari",
+                    "ambari_agent",
+                    "ssh",
+                    "NiFi",
+                    "STORM",
+                    "GRAFANA",
+                    "NiFi_REGISTERY",
+                    "ambari_server",
+                     "zookeeper",
+                       "Solr"
+
+                ],
+                "role_id": "controller"
+            },
+            {
+                "service_ids": [
+                    "ambari_agent",
+                 
+                      "Nifi",
+                      "Metrics Collector",
+
+                    "ssh"
+                ],
+                "role_id": "worker"
+            },
+          {
+                "service_ids": [
+                    "ambari_agent",
+                    "ssh",
+                    "zookeeper",
+                  "Ranger UserSync",
+                   "Ranger Admin",
+                  "Solr"
+                ],
+                "role_id": "Ranger"
+            },
+            {
+                "service_ids": [
+                    "ambari_agent",
+                    "zookeeper",
+                     "Nifi Registry",
+                    "ssh"
+                ],
+                "role_id": "Master"
+            }  
+        ],
+        "selected_roles": [
+            "controller",
+            "worker",
+            "Master",
+            "Ranger"
+           
+        ]
+    },
+    "image": {
+        "checksum": "439bfcfe733cbba285ce5fd8c9489819",
+        "source_file": "bluedata-hdf-ambari27-7x-1.0.tar.gz"
+    },
+    "label": {
+        "name": "HDF 3.X v4 on Centos 7.x with Ambari 2.7.1.1",
+        "description": "HDF 3.X v4 on Centos 7.x with Ambari 2.7.1.1"
+    },
+    "distro_id": "bluedata/hdfv4-ambari27-7x-1",
+    "version": "2.0",
+    "services": [
+        {
+            "exported_service": "ambari",
+            "endpoint": {
+                "port": "8080",
+                "url_scheme": "http",
+                "is_dashboard": true,
+                "path": "/"
+            },
+            "id": "ambari",
+            "label": {
+                "name": "Ambari"
+            }
+        },
+        {
+            "endpoint": {
+                "port": "22",
+                "is_dashboard": false
+            },
+            "id": "ssh",
+            "label": {
+                "name": "SSH"
+            }
+        },
+        {
+            "exported_service": "ambari_agent",
+            "id": "ambari_agent",
+            "label": {
+                "name": "Ambari Agent"
+            }
+        },
+        {
+            "exported_service": "NiFi",
+            "endpoint": {
+                "port": "9092",
+                "url_scheme": "http",
+                "is_dashboard": true,
+                "path": "/nifi"
+            },
+            "id": "NiFi",
+            "label": {
+                "name": "NiFi"
+            }
+        },
+        {
+            "exported_service": "STORM",
+            "endpoint": {
+                "port": "8744",
+                "url_scheme": "http",
+                "is_dashboard": true,
+                "path": "/"
+            },
+            "id": "STORM",
+            "label": {
+                "name": "STORM"
+            }
+        },
+        {
+            "exported_service": "GRAFANA",
+            "endpoint": {
+                "port": "3000",
+                "url_scheme": "http",
+                "is_dashboard": true,
+                "path": "/"
+            },
+            "id": "GRAFANA",
+            "label": {
+                "name": "GRAFANA"
+            }
+        },
+        {
+            "exported_service": "NiFi_REGISTERY",
+            "endpoint": {
+                "port": "61080",
+                "url_scheme": "http",
+                "is_dashboard": true,
+                "path": "/nifi-registry"
+            },
+            "id": "NiFi_REGISTERY",
+            "label": {
+                "name": "NiFi_REGISTERY"
+            }
+        }
+    ],
+    "logo": {
+        "checksum": "de939e0d52f49ec65b6d69e549c9a13d",
+        "source_file": "icon-dataflow.png"
+    },
+    "setup_package": {
+        "config_api_version": 7,
+        "checksum": "2cbd41c9889a615fd7d069817d96a88f",
+        "source_file": "ambari-27-setup.tgz"
+    },
+    "node_roles": [
+        {
+            "min_cores": "4",
+            "cardinality": "1",
+            "min_memory": "12288",
+            "id": "controller"
+        },
+        {
+            "cardinality": "3+",
+            "id": "worker"
+        },
+		{
+            "cardinality": "1",
+            "id": "Ranger"
+        },
+		{
+            "cardinality": "1",
+            "id": "Master"
+        }
+    ],
+    "categories": [
+        "HDF"
+    ]
+}

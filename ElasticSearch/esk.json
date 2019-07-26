@@ -1,0 +1,92 @@
+{
+    "catalog_api_version": "3",
+    "config": {
+        "config_meta": {},
+        "config_choices": [],
+        "node_services": [
+       
+                  {
+                "service_ids": [
+                    "ssh",
+                    "elasticsearch"
+                ],
+                "role_id": "controller"
+            }
+      
+        ],
+        "selected_roles": [
+           
+             "controller"
+           
+            
+        ]
+    },
+    "image": {
+        "checksum": "74e477c9c717d35403ca5e734443d241",
+        "source_file": "bluedata-esk661-centos7-2.0.tar.gz"
+    },
+    "label": {
+        "name": "ElasticSearch 6.6.2",
+        "description": "ElasticSearch 6.6.2"
+    },
+    "distro_id": "bluedata/esk662",
+    "version": "0.1",
+    "services": [
+        {
+            "endpoint": {
+                "port": "22",
+                "is_dashboard": false
+            },
+            "id": "ssh",
+            "label": {
+                "name": "SSH"
+            }
+        },
+        {
+            "endpoint": {
+                "url_scheme": "http",
+                "path": "/",
+                "is_dashboard": true,
+                "port": "9200"
+            },
+            "exported_service": "elasticsearch",
+            "id": "elasticsearch",
+            "label": {
+                "name": "Elastic Search"
+            }
+        },
+        {
+            "endpoint": {
+                "url_scheme": "http",
+                "path": "/",
+                "is_dashboard": true,
+                "port": "5601"
+            },
+            "exported_service": "kibana",
+            "id": "kibana",
+            "label": {
+                "name": "Kibana"
+            }
+        }
+    ],
+    "logo": {
+        "checksum": "a9e8c059d8ecb41be9eb62c97f6a3efc",
+        "source_file": "esk.png"
+    },
+    "setup_package": {
+        "config_api_version": 7,
+        "checksum": "5dd090628b98cdf249ea49874c7fd9d0",
+        "source_file": "appconfig.tgz"
+    },
+    "node_roles": [
+      
+    
+               {
+		"cardinality": "0+",
+            "id": "controller"
+}
+    ],
+    "categories": [
+        "ElasticSearch"
+    ]
+}

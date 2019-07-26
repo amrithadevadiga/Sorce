@@ -1,0 +1,30 @@
+#!/usr/bin/env bdwb
+#
+builder organization --name Bluedata
+#
+# We load the catalog definition to have the muti-choice menu
+catalog load --filepath esk.json
+#
+# Instructions for autogenerating a simple appconfig bundle.
+appconfig autogen --new
+#	
+appconfig autogen --pkgfile elasticsearch/elasticsearch.yml --dest /etc/elasticsearch/elasticsearch.yml
+appconfig autogen --replace /etc/elasticsearch/elasticsearch.yml --pattern @@@@MY_IP@@@@ --macro GET_NODE_IPADDR
+
+#
+# Once configuration files are copied on appropriate nodes roles, the configuration changes are applied on them
+#
+appconfig autogen --execute configure_properties.sh
+appconfig autogen --execute start_services.sh
+
+#
+appconfig autogen --generate
+appconfig package
+#
+#
+logo file --filepath  esk.png
+image build --basedir image/centos --image-repotag bluedata/esk
+image package --image-repotag bluedata/esk --os centos7
+catalog save --filepath staging/esk.json --force
+sources package
+catalog package 
