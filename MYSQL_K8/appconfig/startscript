@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# Copyright (c) 2019, Hewlett Packard Enterprise Development LP
+#
+#
+
+set -o pipefail
+SELF=$(readlink -nf $0)
+export CONFIG_BASE_DIR=$(dirname ${SELF})
+
+source ${CONFIG_BASE_DIR}/logging.sh
+source ${CONFIG_BASE_DIR}/utils.sh
+source ${CONFIG_BASE_DIR}/macros.sh
+
+if [[ "$1" == "--addnodes" ]]; then
+    shift
+    bash ${CONFIG_BASE_DIR}/addnodes.sh $@
+    exit $?
+elif [[ "$1" == "--delnodes" ]]; then
+    shift
+    bash ${CONFIG_BASE_DIR}/delnodes.sh $@
+    exit $?
+elif [[ "$1" == "--configure" ]]; then
+    bash ${CONFIG_BASE_DIR}/configure.sh
+else
+    echo "ERROR: Unknown command line option(s): '$@'"
+    exit 10
+fi
+
+
+REGISTER_START_SERVICE_SYSCTL mysql mysqld

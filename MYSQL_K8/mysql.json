@@ -1,0 +1,73 @@
+ 
+{
+  "kind": "KubeDirectorApp", 
+  "spec": {
+    "defaultImageRepoTag": "docker.io/amrithadevadiga94/mysql:2.1", 
+    "version": "1.0", 
+    "roles": [
+      {
+        "cardinality": "1", 
+        "id": "controller"
+      }
+    ], 
+    "distroID": "bluedata/mysql", 
+    "label": {
+      "name": "mysql", 
+      "description": "mysql"
+    }, 
+    "systemdRequired": true, 
+    "configSchemaVersion": 7, 
+    "defaultConfigPackage": {
+      "packageURL": "file:///opt/configscripts/appconfig.tgz"
+    }, 
+    "services": [
+      {
+        "endpoint": {
+          "port": 22, 
+          "isDashboard": false
+        }, 
+        "id": "ssh", 
+        "label": {
+          "name": "SSH"
+        }
+      }, 
+      {
+            "endpoint": {
+                "loadbalanced": false,
+                "auth_token": false,
+                "is_dashboard": false,
+                "port": "3306"
+            },
+            "id": "mysql",
+            "label": {
+                "name": "Mysql server"
+            }
+        }
+     
+    ], 
+    "defaultPersistDirs": [
+      "/usr", 
+      "/opt", 
+      "/var", 
+      "/data"
+    ], 
+    "config": {
+      "selectedRoles": [
+        "controller"
+      ], 
+      "roleServices": [
+        {
+          "roleID": "controller", 
+          "serviceIDs": [
+            "ssh", 
+            "mysql"
+          ]
+        }
+      ]
+    }
+  }, 
+  "apiVersion": "kubedirector.hpe.com/v1beta1", 
+  "metadata": {
+    "name": "mysql"
+  }	
+}
