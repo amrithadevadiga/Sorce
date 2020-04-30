@@ -35,7 +35,7 @@
             "endpoint": {
                 "loadbalanced": false,
                 "auth_token": false,
-                "is_dashboard": false,
+                "isDashboard": false,
                 "port": "3306"
             },
             "id": "mysql",
