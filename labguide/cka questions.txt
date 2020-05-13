@@ -1,0 +1,55 @@
+Q1. Check the error logs of the pod and save that in the file.
+
+Q2. Create daemonset using the given configuration and do not override taint configuration.
+
+Q3. Create init container that will create empty file.
+https://stackoverflow.com/questions/55340592/kubernetes-trying-to-create-pod-with-init-container
+https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
+
+Q4. Create single pod with multi containers (3).
+
+Q5. Create pv with the given configuration.
+
+Q6. Create a deployment with service
+
+Q7. nsloop pods and service and save it in a file
+
+Q8. Create static pod - jenkins
+
+Q9. Create cluster with kubeadm (use --config /etc/xyz.conf and --ignore-preflight-error=all)
+
+Q10. Make node unavailable
+
+Q11. Find and fix node error
+
+Q12. Fix cluster error
+
+Q13. Find app failure error and fix
+
+Q14. Create secret and use in pod with volume and with env
+
+Q15. Create deployment specification file
+
+Q16. Sort pv with storage capacity
+
+Q17. Find pods using label
+
+Q18. Identify pod with max cpu and save pod name in file using label 
+
+Q19. Create deployent and expose service with nodeport
+
+Q20. Schedule pod on node based on label
+
+Q21. Schedule pod with volume mount in given namespace
+
+Q22. Create pod with labels
+
+Q23. Use jsonpath/sortby
+
+Q24. Create a deployment with replicas and record it. Create rolling upgarde (also record that) and rollback to the last version
+
+Q25. Backup etcd using the given configuration
+
+Q26. Create a pod and mount host volume
+
+
